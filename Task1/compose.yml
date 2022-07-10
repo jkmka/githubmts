@@ -1,0 +1,26 @@
+version: '3'
+services:
+    #First container
+    docker_nginx1:
+      build: .
+      ports:
+        - 10000:8080
+      networks:
+        taskone:
+          ipv4_address: 10.0.0.2
+    #Second container
+    docker_nginx2:
+      build: .
+      ports:
+        - 10001:8080
+      networks:
+        taskone:
+          ipv4_address: 10.0.0.3
+
+    #Network configuration
+networks:
+    taskone:
+      driver: bridge
+      ipam:
+        config:
+          - subnet: 10.0.0.0/29

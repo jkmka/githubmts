@@ -1,0 +1,33 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task2-deployment
+  labels:
+    app: task2-deployment
+spec:
+  selector:
+    matchLabels:
+      app: task2-pod
+  template:
+    metadata:
+      labels:
+        app: task2-pod
+    spec:
+      containers:
+      - name: task2-app
+        image: nginx #gcr.io/google-samples/hello-app:1.0
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: task2-service
+spec:
+  selector:
+    app: task2-pod
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

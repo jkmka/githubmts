@@ -1,0 +1,5 @@
+---
+- hosts: centos_servers
+  become: true
+  roles: 
+    - install_minikube

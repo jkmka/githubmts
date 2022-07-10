@@ -1,0 +1,96 @@
+---
+# tasks file for install_minikube
+- name: Update cache
+  shell: echo hello
+  notify: Update cache centos
+
+- name: Install yum utils
+  yum:
+    name: "{{required_packages}}"
+    state: latest
+
+- name: Update cache
+  shell: echo hello
+  notify: Update cache centos
+
+- name: Setup repository
+  shell: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+- name: Install docker packages
+  yum:
+    name: "{{docker_packages}}"
+    state: latest
+
+- name: Start docker
+  systemd:
+    name: docker
+    state: started
+
+- name: Create docker group
+  group:
+    name: docker
+    state: present
+
+- name: Add docker permissions
+  ansible.builtin.user:
+    name: "{{ansible_user}}"
+    shell: /bin/bash
+    groups: docker
+    append: yes
+
+- name: reset ssh connection
+  ansible.builtin.meta:
+    reset_connection
+    
+- name: Download minikube
+  get_url:
+    url: "https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64"
+    dest: "{{minikube}}"
+  
+- name: set permissions on kubectl
+  file:
+    path: "{{minikube}}"
+    mode: u+rwx,g+rx,o+rx
+
+- name: Start minikube
+  shell: "{{minikube}} start --driver=docker"
+  become: false
+
+- name: Add ingress to minikube
+  shell: "{{minikube}} addons enable ingress"
+  become: false
+
+- name: Get latest kubectl version
+  uri:
+    url: https://storage.googleapis.com/kubernetes-release/release/stable.txt
+    method: GET
+    return_content: yes
+  register: kubctl_v
+
+- name: kubectl
+  get_url:
+    url: "https://dl.k8s.io/release/v1.24.2/bin/linux/amd64/kubectl"
+    dest: /var/tmp/kubectl
+    mode: '0777'
+
+- name: install kubectl 
+  shell: "install -o root -g root -m 0755 /var/tmp/kubectl {{kubectl}}"
+
+- name: Create a directory
+  ansible.builtin.file:
+    path: /kubs
+    state: directory
+    mode: '0755'
+
+- name: Copy yamls
+  copy:
+    src: "{{ item }}"
+    dest: /kubs
+    mode: "0755"
+  with_items: 
+    - kub_dep_hw.yml
+    - kub_ingr_hw.yml
+
+- name: Deploy a hello world
+  shell: kubectl apply -f /kubs/kub_dep_hw.yml -f /kubs/kub_ingr_hw.yml 
+  become: false

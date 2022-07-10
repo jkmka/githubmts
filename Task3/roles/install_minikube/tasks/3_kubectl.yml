@@ -1,0 +1,34 @@
+---
+- name: kubectl
+  get_url:
+    url: "https://dl.k8s.io/release/v1.24.2/bin/linux/amd64/kubectl"
+    dest: /var/tmp/kubectl
+    mode: '0777'
+
+- name: install kubectl 
+  shell: "install -o root -g root -m 0755 /var/tmp/kubectl {{kubectl}}"
+
+- name: Create a directory
+  ansible.builtin.file:
+    path: /kubs
+    state: directory
+    mode: '0755'
+
+- name: Copy yamls
+  copy:
+    src: "{{ item }}"
+    dest: /kubs
+    mode: "0755"
+  with_items: 
+    - kub_dep_hw.yml
+    - kub_ingr_hw.yml
+    - tls_self.crt
+    - tls_self.key
+
+- name: add certificates to kubernetes secrets
+  shell: kubectl create secret tls mts-secret --cert=/kubs/tls_self.crt --key=/kubs/tls_self.key
+  become: false
+
+- name: Deploy a hello world
+  shell: kubectl apply -f /kubs/kub_dep_hw.yml -f /kubs/kub_ingr_hw.yml 
+  become: false

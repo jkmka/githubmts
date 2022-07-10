@@ -1,0 +1,6 @@
+---
+# handlers file for install_minikube
+
+- name: Update cache centos
+  yum:
+    update_cache: yes

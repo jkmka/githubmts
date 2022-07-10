@@ -1,0 +1,20 @@
+---
+# vars file for install_minikube
+docker_packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io
+  - docker-compose-plugin
+
+required_packages:
+  - epel-release
+  - yum-utils
+  - wget
+
+minikube: /usr/bin/minikube
+
+kubectl: /usr/bin/kubectl
+
+kublist: 
+  - kub_dep_hw.yml
+  - kub_ingr_hw.yml

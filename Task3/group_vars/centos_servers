@@ -1,0 +1,4 @@
+---
+ansible_user: jkm
+ansible_password: password
+ansible_ssh_private_key_file : /home/jkm/.ssh/id_rsa

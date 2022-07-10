@@ -1,0 +1,18 @@
+---
+- name: Download minikube
+  get_url:
+    url: "https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64"
+    dest: "{{minikube}}"
+  
+- name: set permissions on minikube
+  file:
+    path: "{{minikube}}"
+    mode: u+rwx,g+rx,o+rx
+
+- name: Start minikube
+  shell: "{{minikube}} start --driver=docker"
+  become: false
+
+- name: Add ingress to minikube
+  shell: "{{minikube}} addons enable ingress"
+  become: false
